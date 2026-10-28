@@ -49,7 +49,7 @@ The API Licence Agreement (section 8.1) shaped these rules:
 
 `.github/workflows/build.yml` runs on push to `main`, every 6 hours (the eBay licence caps listing data at 6 hours old) and on manual dispatch. It has three jobs:
 - `build` uploads `_site` as an artifact;
-- `deploy` publishes it to Cloudflare Pages with wrangler, using `vars.CF_PAGES_PROJECT` for the project name;
+- `deploy` publishes it to Cloudflare Pages with wrangler, using `vars.CF_PAGES_PROJECT` for the project name, then sends the sitemap URLs to IndexNow when `vars.INDEXNOW_KEY` is set (the key file is written to the site root because IndexNow only accepts URLs under the key file's folder);
 - `keepalive` re-enables the workflow through the API, so GitHub doesn't disable the schedule after 60 days without activity.
 
 Actions are pinned to commit SHAs with a `#vX.Y.Z` comment. GitHub Pages is not an option: its terms bar sites aimed at commercial transactions.

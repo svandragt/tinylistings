@@ -54,6 +54,8 @@ Create a production keyset in the eBay developer programme. In the GitHub reposi
 
 On the **Variables** tab, add `CF_PAGES_PROJECT` with your Pages project name.
 
+To have Bing and Yandex pick up changes within hours, also add `INDEXNOW_KEY` with a random hex string, for example from `openssl rand -hex 16`. Each deploy then notifies IndexNow of the pages in the sitemap. Google does not use IndexNow.
+
 ## Cloudflare Pages
 
 1. Create the project once: `npx wrangler pages project create <name> --production-branch=main`.
