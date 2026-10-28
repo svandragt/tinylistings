@@ -37,7 +37,7 @@ All the logic lives in `build.py`: fetch → `prepare()` → render → write `_
 
 ## eBay licence
 
-The API Licence Agreement (section 8.1) shaped these rules:
+The API Licence Agreement (sections 8.1 and 9) shaped these rules:
 - Listing data is at most 6 hours old, hence the 6-hourly build.
 - eBay content that is no longer public must be deleted. That is why sold pages keep only an id, URL, seller and category, and why `.cache/prices.json` is deleted on every live run. Don't keep price history.
 - The price-lowered indicator comes only from eBay's own markdown field, because keeping old prices ourselves breaks that rule.
@@ -45,6 +45,7 @@ The API Licence Agreement (section 8.1) shaped these rules:
 - A public privacy page is required.
 - No framing of eBay pages.
 - No price modelling.
+- No links to or promotion of competing marketplaces such as Vinted. Section 9 bans using eBay content to "promote … any site or service competitive to eBay Services", and eBay can revoke API access at its own discretion. Link those from outside the site.
 
 ## Deploy
 
