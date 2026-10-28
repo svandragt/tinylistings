@@ -140,6 +140,17 @@ assert sold_url not in "".join(urls) and sold_url not in (out / "feed.xml").read
 assert sold_url not in read("/") and sold_url not in read("/category/wristwatches/") and sold_url not in read("/seller/example-seller-a/")
 assert read("/category/wristwatches/").count('class="h-product"') == 3  # the sold item is not counted
 assert "Wristwatches (3)" in read("/")
+
+# per-hub Atom feeds and the Feedrabbit follow link
+cf = (out / "category/wristwatches/feed.xml").read_text()
+assert cf.count("<entry>") == read("/category/wristwatches/").count('class="h-product"')
+assert re.search(r'<link rel="self" href="[^"]*/category/wristwatches/feed.xml"', cf)
+assert (out / "brand/casio/feed.xml").exists() and (out / "seller/example-seller-b/feed.xml").exists()
+assert not (out / "new/feed.xml").exists()
+cp = read("/category/wristwatches/")
+assert re.search(r'<link rel="alternate" type="application/atom\+xml" href="/category/wristwatches/feed.xml"', cp)
+assert "feedrabbit.com/subscriptions/new?url=" in cp
+assert re.search(r'<link rel="alternate" type="application/atom\+xml" href="/feed.xml"', read("/"))
 sold_out = Path(tempfile.mkdtemp())
 build.build(items, sold_out, sold=[{**sold[0], "seller": "gone", "cat_slug": "no-such-category"}])  # no match: no section; unknown seller: no link
 gone = (sold_out / sold_url.strip("/") / "index.html").read_text()

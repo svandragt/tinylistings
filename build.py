@@ -335,6 +335,16 @@ def hub_description(items, name, n=1):
     return d[:160]
 
 
+def atom(out, path, title, items):
+    updated = items[0]["created"] if items else ""
+    write(out, f"{path}feed.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n'
+          f'<title>{xml_escape(title)}</title>\n<id>{C["site_url"]}{path}</id>\n<updated>{updated}</updated>\n'
+          f'<link rel="self" href="{C["site_url"]}{path}feed.xml"/>\n<link href="{C["site_url"]}{path}"/>\n'
+          + "".join(f'<entry><title>{xml_escape(i["title"])}</title><id>{C["site_url"]}{i["url"]}</id><updated>{i["created"]}</updated>'
+                    f'<link href="{C["site_url"]}{i["url"]}"/><summary>{xml_escape(i["text"][:300] or i["title"])}</summary></entry>\n'
+                    for i in items[:30]) + "</feed>\n")
+
+
 def hub(out, sitemap, path, heading, items, kind=None, slug=None, link_groups=(), extra_ld=(), title=None):
     """A listing page: paginated, self-canonical, noindex while it has too few items."""
     sellers = len({i["seller"] for i in items})
@@ -345,8 +355,11 @@ def hub(out, sitemap, path, heading, items, kind=None, slug=None, link_groups=()
     chunks = [items[i:i + PAGE_SIZE] for i in range(0, len(items), PAGE_SIZE)] or [[]]
     urls = [path if n == 1 else f"{path}page/{n}/" for n in range(1, len(chunks) + 1)]
     crumbs = [("Home", "/"), (heading, path)] if path != "/" else []
+    feed = f"{path}feed.xml" if kind else "/feed.xml"
+    if kind:
+        atom(out, path, f"{heading} | {C['site_name']}", items)
     for n, chunk in enumerate(chunks, 1):
-        page(out, urls[n - 1], "hub.html",
+        page(out, urls[n - 1], "hub.html", feed=feed,
              title=f"{title or heading}{f' - page {n}' if n > 1 else ''} | {C['site_name']}",
              description=intro[0][:160] if intro else hub_description(items, name, n), heading=heading, intro=intro, summary=summary, items=chunk,
              robots="noindex,follow" if thin else None, link_groups=link_groups,
@@ -529,13 +542,7 @@ def build(items, out, sold=()):
                                             "image": i["thumb"], "srcset": i["thumb_srcset"], "category": i["cat"]} for i in items]))
     write(out, "/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"<url><loc>{xml_escape(u)}</loc><lastmod>{d}</lastmod></url>\n" for u, d in sitemap) + "</urlset>\n")
-    updated = items[0]["created"] if items else ""
-    write(out, "/feed.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n'
-          f'<title>{xml_escape(C["site_name"])}</title>\n<id>{C["site_url"]}/</id>\n<updated>{updated}</updated>\n'
-          f'<link rel="self" href="{C["site_url"]}/feed.xml"/>\n<link href="{C["site_url"]}/"/>\n'
-          + "".join(f'<entry><title>{xml_escape(i["title"])}</title><id>{C["site_url"]}{i["url"]}</id><updated>{i["created"]}</updated>'
-                    f'<link href="{C["site_url"]}{i["url"]}"/><summary>{xml_escape(i["text"][:300] or i["title"])}</summary></entry>\n'
-                    for i in items[:30]) + "</feed>\n")
+    atom(out, "/", C["site_name"], items)
     write(out, "/_headers", headers())
     write(out, "/robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {C['site_url']}/sitemap.xml\n")
     shutil.copytree(ROOT / "static", out / "static", ignore=shutil.ignore_patterns("style.css"))

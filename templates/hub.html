@@ -3,6 +3,7 @@
 {% block content %}
 <h1>{% if card_url %}<span class="h-card"><span class="p-name">{{ heading }}</span><data class="u-url" value="{{ card_url }}"></data></span>{% else %}{{ heading }}{% endif %}</h1>
 {% if intro %}<section class="intro">{% for p in intro %}<p>{{ p }}</p>{% endfor %}</section>{% else %}<p>{{ summary }}</p>{% endif %}
+<p class="follow"><a href="https://feedrabbit.com/subscriptions/new?url={{ (site.site_url ~ feed)|urlencode }}">Follow by email</a> &middot; <a href="{{ feed }}">Atom feed</a></p>
 {% for group_title, links in link_groups %}{% if links %}
 <h2>{{ group_title }}</h2>
 <ul class="tags">{% for name, url, count in links %}<li><a href="{{ url }}">{{ name }} ({{ count }})</a></li>{% endfor %}</ul>
